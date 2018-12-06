@@ -68,11 +68,31 @@ distinctElementsRDD.collect
 
 ---
 
+## Scala Object VS Scala App 
+
+When coding in IDE, you will be choosing to create a Scala Object or a Scala App under a package. 
+
+- Scala Object 
+  - With main function. 
+  - You are able to specify input parameters when executing the program. 
+
+- Scala App
+  - Extends `App`.
+  - Without main function.
+  
+---
+
+## Read CSV File as Dataset
+
+When reading a CSV file as a Dataset with a case class, make sure headers of the CSV file matches fields of the case class. If the headers do not match, use code to modify them, e.g. removing spaces and lowering case the first character, and then convert to Dataset.   
+
+---
+
 ## Troubleshooting
 
-- Problem 1
+- **Problem 1**
 
-Run hello world example once after setting up the project, got such an error.
+When running "hello world" example once after setting up the project, got such an error.
 
 ```
 Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 10582

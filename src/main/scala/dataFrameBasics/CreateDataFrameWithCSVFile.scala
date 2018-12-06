@@ -13,7 +13,9 @@ object CreateDataFrameWithCSVFile {
       // if the csv file contains header
       // if you do not write this, the header will also be included in the DataFrame, which is not wanted 
       .option("header", "true")  
-      .option("inferSchema", "true")  // if you want to infer schema of the csv file
+      // if you want to infer schema of the csv file
+      // if you do not write this, all fields will be treated as String type
+      .option("inferSchema", "true")  
       // or
       // .options(Map("header" -> "true", "inferSchema" -> "true"))
       .csv("src/main/resources/datasets/people.csv")

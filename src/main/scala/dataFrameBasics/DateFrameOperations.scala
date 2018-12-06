@@ -28,7 +28,7 @@ object DateFrameOperations {
     // select specific columns as a new DataFrame
     usersDF.select("name", "favorite_color").show(5)
     
-    // get DataFrame with conditions (similar with sql statement)
+    // get DataFrame with conditions (similar to sql statement)
     usersDF.where("favorite_color == 'red'").show(5)
     // or 
     // usersDF.filter(usersDF("favorite_color") === "red").show(5)
