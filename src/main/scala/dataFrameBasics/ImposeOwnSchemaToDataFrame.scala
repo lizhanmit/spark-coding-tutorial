@@ -25,6 +25,7 @@ object ImposeOwnSchemaToDataFrame {
     // by default, column "salary" is inferred as integer type
     // now we impose it as float type
     val ownSchema = StructType(
+        // StructField("<columnName>", <columnType>, <nullable>)
         StructField("name", StringType, true) ::
         StructField("age", IntegerType, true) ::
         StructField("job", StringType, true) ::
