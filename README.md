@@ -84,7 +84,17 @@ When coding in IDE, you will be choosing to create a Scala Object or a Scala App
 
 ## Read CSV File as Dataset
 
-When reading a CSV file as a Dataset with a case class, make sure headers of the CSV file matches fields of the case class. If the headers do not match, use code to modify them, e.g. removing spaces and lowering case the first character, and then convert to Dataset.   
+When reading a CSV file as a Dataset with a case class, make sure headers of the CSV file matches fields of the case class. If they are not same, use code to modify the header after converting the CSV file to DataFrame, e.g. removing spaces and lowering case the first character, and then convert to Dataset.   
+
+---
+
+## Spark UDF 
+
+Steps: 
+
+1. Define a function. 
+2. Convert the function into a UDF. 
+3. Apply the UDF to DataFrame or Dataset.
 
 ---
 
