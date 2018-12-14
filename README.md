@@ -1,16 +1,25 @@
-# Spark Coding Tutorial 
+# Spark Coding Tutorial
 
 This tutorial shows you how to code with Spark (Scala).
 
 If you would like to see tutorial about Spark concepts, go to [Spark Note](https://github.com/lizhanmit/learning-notes/blob/master/spark-note/spark-note.md).
 
-Environment: 
+Environment:
 
 - Spark 2.4.0
 - Scala: 2.12.3
-- IDE: Scala IDE Eclipse 
+- IDE: Scala IDE Eclipse
 
---- 
+---
+
+## Installation
+
+Modify log4j
+
+1. Under `spark/conf` folder, copy log4j.properties.template file to log4j.properties.
+2. Open log4j.properties, modify `log4j.rootCategory=INFO, console` to `log4j.rootCategory=ERROR, console`.
+
+---
 
 ## Code in Spark Shell
 
@@ -56,7 +65,7 @@ val distinctElementsRDD = numRDD.distinct
 distinctElementsRDD.collect
 ```
 
---- 
+---
 
 ## Set Up Spark Projects in IDE
 
@@ -68,18 +77,18 @@ distinctElementsRDD.collect
 
 ---
 
-## Scala Object VS Scala App 
+## Scala Object VS Scala App
 
-When coding in IDE, you will be choosing to create a Scala Object or a Scala App under a package. 
+When coding in IDE, you will be choosing to create a Scala Object or a Scala App under a package.
 
-- Scala Object 
-  - With main function. 
-  - You are able to specify input parameters when executing the program. 
+- Scala Object
+  - With main function.
+  - You are able to specify input parameters when executing the program.
 
 - Scala App
   - Extends `App`.
   - Without main function.
-  
+
 ---
 
 ## Read CSV File as Dataset
@@ -88,12 +97,12 @@ When reading a CSV file as a Dataset with a case class, make sure headers of the
 
 ---
 
-## Spark UDF 
+## Spark UDF
 
-Steps: 
+Steps:
 
-1. Define a function. 
-2. Convert the function into a UDF. 
+1. Define a function.
+2. Convert the function into a UDF.
 3. Apply the UDF to DataFrame or Dataset.
 
 ---
