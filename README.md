@@ -10,6 +10,14 @@ Environment:
 - Scala: 2.12.3
 - IDE: Scala IDE Eclipse
 
+Code Review Sequence:
+
+1. rddBasics package
+2. dataFrameBasics package
+3. datasetBasics package
+4. onClusterBasics package
+5. udfBasics package
+
 ---
 
 ## Installation
