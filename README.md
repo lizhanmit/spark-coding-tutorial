@@ -148,7 +148,7 @@ dataPuddle.write.parquet("s3a://my_bucket/puddle/")
 val dataPuddle = dataLake.sample(true, 0.000001)
 val goodPuddle = dataPuddle.repartition(4)
 goodPuddle.write.parquet("s3a://my_bucket/puddle/")
-``` 
+```
 
 6. **Why choosing 4 partitions here?** 13,000 partitions / 1,000,000 = 1 partition. Then `number_of_partitions = number_of_cpus_in_cluster * 4` (2, 3 or 4).
 7. **Why using repartition instead of coalesce here?** The data puddle is small. The repartition method returns equal sized text files, which are more efficient for downstream consumers.
