@@ -120,6 +120,7 @@ Steps:
 ### Coalesce
 
 - Coalesce is fast in certain situations because it minimizes data movement.
+- No shuffle. Merge partitions on the same node into one partition.
 - Coalesce changes the number of nodes by moving data from some partitions to existing partitions. This algorithm obviously **cannot increase** the number of partitions.
   - For example, `numbersDf.rdd.partitions.size` is 4. Even if you use `numbersDf.coalesce(6)`, it is still 4 rather than 6.
 - Avoids a full data shuffle.
@@ -153,7 +154,8 @@ goodPuddle.write.parquet("s3a://my_bucket/puddle/")
 6. **Why choosing 4 partitions here?** 13,000 partitions / 1,000,000 = 1 partition. Then `number_of_partitions = number_of_cpus_in_cluster * 4` (2, 3 or 4).
 7. **Why using repartition instead of coalesce here?** The data puddle is small. The repartition method returns equal sized text files, which are more efficient for downstream consumers.
 
-**When filtering large DataFrames into smaller ones, you should almost always repartition the data.**
+- **When filtering large DataFrames into smaller ones, you should almost always repartition the data.**
+- **If you are reducing the number of overall partitions, first try `coalesce`.**
 
 ---
 
