@@ -16,11 +16,14 @@ Code Review Sequence:
 2. dataFrameBasics package
 3. datasetBasics package
 4. onClusterBasics package
-5. udfBasics package
+5. onClusterBasics.operateMySQLWithSpark package
+6. udfBasics package
+7. sparkML package
+8. udemy serial packages
 
 ---
 
-## Installation
+## Spark Installation
 
 Modify log4j
 
@@ -156,6 +159,57 @@ goodPuddle.write.parquet("s3a://my_bucket/puddle/")
 
 - **When filtering large DataFrames into smaller ones, you should almost always repartition the data.**
 - **If you are reducing the number of overall partitions, first try `coalesce`.**
+
+---
+
+## Running with `spark-submit`
+
+1. Make sure there are no paths to your local file system used in your script as the file system might be HDFS or Amazon S3.
+2. Package up your Scala project into a .jar file.
+	- If the project has many dependencies, use sbt to package your project instead of IDE export. Then use `spark-submit <your_.jar_file>` to run **without other parameters**.
+3. Use `spark-submit` to execute driver script in command line.
+
+```
+spark-submit \
+--class <class_object_that_contains_your_main_function> \
+--jars <paths_to_any_dependencies> \
+--files <files_you_want_placed_alongside_your_application> \
+<your_.jar_file> \
+<main_function_args>
+```
+
+You may need to specify the following parameters when running on cluster and you need to tweak them. 
+
+- These parameters should be pre-configured on cluster or in Spark configuration file. 
+
+![spark-submit-parameters-cluster.png](src/main/resources/img/spark-submit-parameters-cluster.png)
+
+---
+
+## Running on Cluster
+
+Take Amazon EMR (Elastic MapReduce) as an example.
+
+### Best Practice 
+
+- If executors start failing, you may need to adjust the memory each executor has from the master node. `spark-submit --executor-memory 1g <your .jar file>`
+- If something timed out or heartbeat failed, it indicates your cluster is not big enough (hardware aspect) or you did not partition your job well.
+	- (Try 1st) Use `partitionBy()` to demand less work from each executor by using smaller partitions.
+	- (2nd) Each executor may need more memory.
+	- (3rd) You may need more machines (capacity) in your cluster. 
+- Try to keep dependencies (packages) to a minimum. 
+	- If you only need to write several more lines of code, **DO NOT** import a new package. 
+	- Time is money on your cluster.
+
+### Steps 
+
+1. Get your scripts and data someplace where EMR can access them easily. 
+	- AWS's S3 is a good choice. Use `s3n://<file_path>` when specifying file paths, and make sure your file permissions make them accessible.
+2. Start Spark on AWS. 
+3. Get the external DNS name for the master node, and log into it using user account and private key file. 
+4. Copy driver program's .jar file and any other files it needs to the master node using `aws s3 cp s3://<bucket_name>/<file_name> ./`.
+5. Run `spark-submit`.
+6. Terminate your cluster when you are done.
 
 ---
 
