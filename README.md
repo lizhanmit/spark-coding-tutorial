@@ -25,10 +25,18 @@ Code Review Sequence:
 
 ## Spark Installation
 
-Modify log4j
+### Modify log4j
 
 1. Under `spark/conf` folder, copy log4j.properties.template file to log4j.properties.
 2. Open log4j.properties, modify `log4j.rootCategory=INFO, console` to `log4j.rootCategory=ERROR, console`.
+
+### Set Up Spark Projects in IDE
+
+1. Download Scala IDE for Eclipse.
+2. Create a Maven project.
+3. Rename folder "java" to "scala" for both "main" and "test".
+4. Right click the project -> "Configure" -> "Add Scala Nature" to add Scala library.
+5. Add dependencies in pom.xml.
 
 ---
 
@@ -78,13 +86,38 @@ distinctElementsRDD.collect
 
 ---
 
-## Set Up Spark Projects in IDE
+## Spark Core Coding
 
-1. Download Scala IDE for Eclipse.
-2. Create a Maven project.
-3. Rename folder "java" to "scala" for both "main" and "test".
-4. Right click the project -> "Configure" -> "Add Scala Nature" to add Scala library.
-5. Add dependencies in pom.xml.
+### RDD Coding
+
+- Get keys of RDD: `<rdd_var>.keys`
+- Get values of RDD: `<rdd_var>.values`
+- Sort RDD by key: `<rdd_var>.sortByKey()`
+  - Ascending is default.
+  - Descending: `<rdd_var>.sortByKey(false)`
+- Sort RDD: `<rdd_var>.sortBy(<sort_accordance>)`
+  - E.g. according to the second element of tuple in descending: `<rdd_var>.sortBy(_._2, false)`
+- Only do mapping for RDD values: `<rdd_var>.mapValues(<func>)`
+  - E.g. add 1 for values only: `<rdd_var>.mapValues(_ + 1)`
+- Join two RDDs with the same key: `<rdd_var1>.join(<rdd_var2>)`
+  - E.g. `(k, v1).join(k, v2)` Then you will get `(k, (v1, v2))`.
+- Create a new key for RDD: `<rdd_var>.keyBy(<func>)`
+  - E.g. `<rdd_var>.keyBy(<tuple> => <tuple._1>)`
+
+### DataFrame Coding
+
+- `myDF.show()``
+- `myDF.select("someFieldName")`
+- `myDF.filter(myDF("someFieldName") > 200)`
+- `myDF.groupBy(myDF("someFieldName")).mean()`
+- `myDF.rdd().map(<mapperFunction>)`
+
+UDF:
+
+```scala
+val myUDF = (x => <userDefinedFunction>)
+val myNewDF = myDF.withColumn("newColumnName", myUDF('columnName'))
+```
 
 ---
 
@@ -178,9 +211,9 @@ spark-submit \
 <main_function_args>
 ```
 
-You may need to specify the following parameters when running on cluster and you need to tweak them. 
+You may need to specify the following parameters when running on cluster and you need to tweak them.
 
-- These parameters should be pre-configured on cluster or in Spark configuration file. 
+- These parameters should be pre-configured on cluster or in Spark configuration file.
 
 ![spark-submit-parameters-cluster.png](src/main/resources/img/spark-submit-parameters-cluster.png)
 
@@ -190,23 +223,23 @@ You may need to specify the following parameters when running on cluster and you
 
 Take Amazon EMR (Elastic MapReduce) as an example.
 
-### Best Practice 
+### Best Practice
 
 - If executors start failing, you may need to adjust the memory each executor has from the master node. `spark-submit --executor-memory 1g <your .jar file>`
 - If something timed out or heartbeat failed, it indicates your cluster is not big enough (hardware aspect) or you did not partition your job well.
 	- (Try 1st) Use `partitionBy()` to demand less work from each executor by using smaller partitions.
 	- (2nd) Each executor may need more memory.
-	- (3rd) You may need more machines (capacity) in your cluster. 
-- Try to keep dependencies (packages) to a minimum. 
-	- If you only need to write several more lines of code, **DO NOT** import a new package. 
+	- (3rd) You may need more machines (capacity) in your cluster.
+- Try to keep dependencies (packages) to a minimum.
+	- If you only need to write several more lines of code, **DO NOT** import a new package.
 	- Time is money on your cluster.
 
-### Steps 
+### Steps
 
-1. Get your scripts and data someplace where EMR can access them easily. 
+1. Get your scripts and data someplace where EMR can access them easily.
 	- AWS's S3 is a good choice. Use `s3n://<file_path>` when specifying file paths, and make sure your file permissions make them accessible.
-2. Start Spark on AWS. 
-3. Get the external DNS name for the master node, and log into it using user account and private key file. 
+2. Start Spark on AWS.
+3. Get the external DNS name for the master node, and log into it using user account and private key file.
 4. Copy driver program's .jar file and any other files it needs to the master node using `aws s3 cp s3://<bucket_name>/<file_name> ./`.
 5. Run `spark-submit`.
 6. Terminate your cluster when you are done.
