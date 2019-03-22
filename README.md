@@ -106,7 +106,7 @@ distinctElementsRDD.collect
 
 ### DataFrame Coding
 
-- `myDF.show()``
+- `myDF.show()`
 - `myDF.select("someFieldName")`
 - `myDF.filter(myDF("someFieldName") > 200)`
 - `myDF.groupBy(myDF("someFieldName")).mean()`
@@ -118,6 +118,15 @@ UDF:
 val myUDF = (x => <userDefinedFunction>)
 val myNewDF = myDF.withColumn("newColumnName", myUDF('columnName'))
 ```
+
+---
+
+## `import spark.implicts._`
+
+When to use:
+
+- when creating a Dataset.
+- when using `$<columnName>` to convert a string to a column.
 
 ---
 
