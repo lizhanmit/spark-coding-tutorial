@@ -175,6 +175,8 @@ Steps:
 - Repartition can be used to either increase or decrease the number of partitions in a DataFrame.
 - Does a full data shuffle.
 - If there is only a little amount of data but the number of partitions is big, there will be many empty partitions.
+- You should only repartition when the future number of partitions is greater than the current number of partitions or when you are looking to partition by a set of columns.
+- If you are going to be filtering by a certain column ofter, it can be worth repartitioning based on that column. E.g. `df.repartition(col("<columnName>"))`, or `df.repartition(<numberOfPartitions>, col("<columnName>"))`.
 
 ### Real World Example
 
@@ -252,6 +254,18 @@ Take Amazon EMR (Elastic MapReduce) as an example.
 4. Copy driver program's .jar file and any other files it needs to the master node using `aws s3 cp s3://<bucket_name>/<file_name> ./`.
 5. Run `spark-submit`.
 6. Terminate your cluster when you are done.
+
+---
+
+## Tips
+
+- **DO NOT** recommend using `toDF` on `Seq` type for production, because it does not play well with null types.
+    - E.g. `val myDF = Seq(("Hello", 2, 1L)).toDF("col1", "col2", "col3")`.
+
+### Optimization
+
+- Sometimes it is advisable to sort within each partition using `sortWithinPartitions` before another set of transformations.
+    - E.g. `spark.read.format("json").load("filePath").sortWithinPartitions("<columnName>")`.
 
 ---
 
