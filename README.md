@@ -261,6 +261,21 @@ Take Amazon EMR (Elastic MapReduce) as an example.
 
 - **DO NOT** recommend using `toDF` on `Seq` type for production, because it does not play well with null types.
     - E.g. `val myDF = Seq(("Hello", 2, 1L)).toDF("col1", "col2", "col3")`.
+- Spark’s TimestampType class supports only second-level precision. If you are going to be working with milliseconds, use `LongType`.
+- Recommend parsing dates, timestamps and nulls explicitly instead of relying on implicit conversions.
+- Show all rows of a DataFrame in the console instead of only 20 rows by default: `df.show(df.count())`.
+
+### Null Values
+
+- Use nulls to represent missing or empty data in DataFrames, because Spark can optimize working with null values more than it can if you use empty strings or other values.
+- Use `asc_nulls_first`, `desc_nulls_first`, `asc_nulls_last`, or `desc_nulls_last` to specify where you would like your null values to appear in an ordered DataFrame.
+
+Two things you can do with null values:
+
+- explicitly drop nulls
+- fill them with a value (globally or on a per-column basis)
+
+---
 
 ### Optimization
 
