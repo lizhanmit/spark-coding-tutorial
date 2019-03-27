@@ -263,7 +263,16 @@ Take Amazon EMR (Elastic MapReduce) as an example.
     - E.g. `val myDF = Seq(("Hello", 2, 1L)).toDF("col1", "col2", "col3")`.
 - Spark’s TimestampType class supports only second-level precision. If you are going to be working with milliseconds, use `LongType`.
 - Recommend parsing dates, timestamps and nulls explicitly instead of relying on implicit conversions.
+- When performing grouping sets, if you do not filter out null values, you will get incorrect results. This applies to cubes, rollups, and grouping sets.
+
+### Count
+
 - Show all rows of a DataFrame in the console instead of only 20 rows by default: `df.show(df.count())`.
+- When performing calculations over big data, it can be quite expensive to get an exact answer to a question, and it is often much cheaper to simply request an approximate to a reasonable degree of accuracy. E.g. `approx_count_distinct("<column_name>", <max_estimation_percentage_error_allowed>)`.
+- `count(*)` will count null values (including rows containing all nulls). `count("<columnName>")` will not count null values.
+- Two ways to perform count:
+    - count method - action - return result immediately
+    - count function in `agg()` method - transformation - lazy evaluation (**prefer this one**)
 
 ### Null Values
 
