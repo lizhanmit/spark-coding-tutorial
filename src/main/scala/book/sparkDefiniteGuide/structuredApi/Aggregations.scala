@@ -228,12 +228,8 @@ object Aggregations {
       .show(false)
 
 
-
-
-
-
-
-
+    // pivot
+    dfWithDate.groupBy("date").pivot("Country").sum().show(3)
 
   }
 
