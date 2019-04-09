@@ -284,8 +284,6 @@ Two things you can do with null values:
 - explicitly drop nulls
 - fill them with a value (globally or on a per-column basis)
 
----
-
 ### Optimization
 
 - Sometimes it is advisable to sort within each partition using `sortWithinPartitions` before another set of transformations.
