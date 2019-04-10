@@ -2,8 +2,11 @@ package book.sparkDefiniteGuide.streaming
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.streaming.Trigger
 
 object StructuredStreaming {
+
+  case class Flight(DEST_COUNTRY_NAME: String, ORIGIN_COUNTRY_NAME: String, count: BigInt)
 
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
@@ -27,7 +30,7 @@ object StructuredStreaming {
     // streaming version
     // "maxFilesPerTrigger" controls how quickly Spark will read all of the files in the folder
     // here we set it as 1, which is for the purpose of demonstrating how Spark Streaming works, probably not for production
-    // avoid using schema this way in production where your data may (accidentally) change,
+    // NOTE: avoid using schema this way in production where your data may (accidentally) change,
     // instead, use schema inference through setting the configuration "spark.sql.streaming.schemaInference" to true
     println("=== streaming version ===")
     val streamingDF = spark.readStream
@@ -35,7 +38,6 @@ object StructuredStreaming {
       .option("maxFilesPerTrigger", 1)
       .json(file)
 
-/*
 
     /*
      * count
@@ -101,8 +103,6 @@ object StructuredStreaming {
     deviceModelStats.awaitTermination()
 
 
-
-
     /*
      * joins
      */
@@ -125,13 +125,48 @@ object StructuredStreaming {
 
     deviceModelStats2.awaitTermination()
 
-*/
+
+    /*
+     * kafka source
+     */
+    println("=== kafka source ===")
+    // subscribe to one topic
+    val ds1 = spark.readStream
+      .format("kafka")
+      .option("kafka.bootstrap.servers", "host1:port1, host2:port2")
+      .option("subscribe", "topic1")
+      .load()
+
+    // subscribe to multiple topics
+    val ds2 = spark.readStream
+      .format("kafka")
+      .option("kafka.bootstrap.servers", "host1:port1, host2:port2")
+      .option("subscribe", "topic1, topic2")
+      .load()
+
+    // subscribe to a pattern of topics
+    val ds3 = spark.readStream
+      .option("kafka.bootstrap.servers", "host1:port1, host2:port2")
+      .option("subscribePattern", "topic.*")
+      .load()
+
+    /*
+     * kafka sink
+     */
+    println("=== kafka sink ===")
+    ds1.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+      .writeStream
+      .format("kafka")
+      .option("checkpointLocation", "<locationDir>")
+      .option("kafka.bootstrap.servers", "host1:port1, host2:port2")
+      .option("topic", "topic1")
+      .start()
 
 
     /*
-     * input & output
+     * socket source
      */
-    println("=== input & output ===")
+    println("=== socket source ===")
     // socket source (only for testing, not in production)
     val socketDF = spark.readStream
       .format("socket")
@@ -139,11 +174,61 @@ object StructuredStreaming {
       .option("port", 9999)
       .load()
 
-    // console sink (only for testing, not in production)
+
+    /*
+     * console sink (only for testing, not in production)
+     */
+    println("=== console sink ===")
     val socketConsoleSink = socketDF.writeStream.format("console").start()
     socketConsoleSink.awaitTermination()
 
 
+    /*
+     * trigger
+     */
+    println("=== trigger ===")
+    // processing time trigger
+    val activityQuery2 = activityCounts.writeStream
+      .trigger(Trigger.ProcessingTime("5 seconds"))
+      .format("console")
+      .outputMode("complete")
+      .start()
+    activityQuery2.awaitTermination()
+
+
+    // once trigger
+    val activityQuery3 = activityCounts.writeStream
+      .trigger(Trigger.Once())
+      .format("console")
+      .outputMode("complete")
+      .start()
+    activityQuery3.awaitTermination()
+
+
+    /*
+     * Streaming Dataset API
+     */
+    println("=== Streaming Dataset API ===")
+    val flightDataSchema = spark.read
+      .parquet("src/main/resources/sparkDefiniteGuide/inputData/flight-data/2010-summary.parquet")
+      .schema
+    val flightsDS = spark.readStream
+      .schema(flightDataSchema)
+      .parquet("src/main/resources/sparkDefiniteGuide/inputData/flight-data/2010-summary.parquet")
+      .as[Flight]
+
+    def originIsDestination(flight: Flight): Boolean = {
+      flight.DEST_COUNTRY_NAME == flight.ORIGIN_COUNTRY_NAME
+    }
+
+    flightsDS.filter(originIsDestination(_))
+      .groupByKey(_.DEST_COUNTRY_NAME)
+      .count()
+      .writeStream
+      .queryName("flight_counts")
+      .format("memory")
+      .outputMode("complete")
+      .start()
 
   }
 }
