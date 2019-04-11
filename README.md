@@ -311,3 +311,25 @@ Solution: Add such a dependency in pom.xml.
 	<version>2.8</version>
 </dependency>
 ```
+
+- **Problem 2**
+
+When running the belwo code:
+
+```scala
+val dfWithEventTimeQuery3 = dfWithEventTime.groupBy(window(col("Event_Time"), "10 minutes", "10 seconds"))
+      .count()
+      .writeStream
+      .queryName("events_per_window_sliding")
+      .format("memory")
+      .outputMode("complete")
+      .start()
+```
+
+got error: 
+
+```
+ERROR CodeGenerator: failed to compile: org.codehaus.janino.InternalCompilerException: Compiling "GeneratedClass": Code of method "expand_doConsume$(Lorg/apache/spark/sql/catalyst/expressions/GeneratedClass$GeneratedIteratorForCodegenStage1;JZ)V" of class "org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1" grows beyond 64 KB
+```
+
+Reason: The problem is that when Java programs generated using Catalyst from programs using DataFrame and Dataset are compiled into Java bytecode, the size of byte code of one method must not be 64 KB or more, This conflicts with the limitation of the Java class file, which is an exception that occurs.
