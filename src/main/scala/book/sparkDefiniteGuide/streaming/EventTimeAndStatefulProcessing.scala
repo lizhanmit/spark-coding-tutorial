@@ -15,7 +15,6 @@ object EventTimeAndStatefulProcessing {
 
     spark.conf.set("spark.sql.shuffle.partitions", 5)
 
-    import spark.implicits._
 
     val file = "src/main/resources/sparkDefiniteGuide/inputData/activity-data"
     val staticDF = spark.read
@@ -34,7 +33,7 @@ object EventTimeAndStatefulProcessing {
     // create Event_Time column based on Creation_Time column
     val dfWithEventTime = streamingDF.selectExpr("*", "cast(cast(Creation_Time as double) / 1000000000 as timestamp) as Event_Time")
 
-/*
+
     /*
      * event-time processing
      */
@@ -51,6 +50,7 @@ object EventTimeAndStatefulProcessing {
       spark.sql("select * from events_per_window").show(3, false)
       Thread.sleep(2000)
     }
+
 
     println("=== tumbling windows with multi-column aggregation ===")
     val dfWithEventTimeQuery2 = dfWithEventTime.groupBy(window(col("Event_Time"), "10 minutes"), col("User"))
@@ -99,7 +99,6 @@ object EventTimeAndStatefulProcessing {
       .outputMode("complete")
       .start()
 
-*/
 
     /*
      * deduplication
@@ -116,10 +115,10 @@ object EventTimeAndStatefulProcessing {
       .start()
 
 
-    //dfWithEventTimeQuery.awaitTermination()
-    //dfWithEventTimeQuery2.awaitTermination()
-    //dfWithEventTimeQuery3.awaitTermination()
-    //dfWithEventTimeQuery4.awaitTermination()
+    dfWithEventTimeQuery.awaitTermination()
+    dfWithEventTimeQuery2.awaitTermination()
+    dfWithEventTimeQuery3.awaitTermination()
+    dfWithEventTimeQuery4.awaitTermination()
     dfWithEventTimeQuery5.awaitTermination()
   }
 }
