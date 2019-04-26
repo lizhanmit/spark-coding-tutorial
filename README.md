@@ -273,6 +273,7 @@ Take Amazon EMR (Elastic MapReduce) as an example.
 - Two ways to perform count:
     - count method - action - return result immediately
     - count function in `agg()` method - transformation - lazy evaluation (**prefer this one**)
+- `rdd.countByValue()` loads the result set into the memory of the driver. Use this method **only** if the resulting map is expected to be small, such as the total number of rows is low or the number of distinct items is low.
 
 ### Null Values
 
