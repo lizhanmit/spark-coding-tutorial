@@ -146,63 +146,7 @@ When coding in IDE, you will be choosing to create a Scala Object or a Scala App
 
 ## Read CSV File as Dataset
 
-When reading a CSV file as a Dataset with a case class, make sure headers of the CSV file matches fields of the case class. If they are not same, use code to modify the header after converting the CSV file to DataFrame, e.g. removing spaces and lowering case the first character, and then convert to Dataset.   
-
----
-
-## Spark UDF
-
-Steps:
-
-1. Define a function.
-2. Convert the function into a UDF.
-3. Apply the UDF to DataFrame or Dataset.
-
----
-
-## Coalesce VS Repartition
-
-### Coalesce
-
-- Coalesce is fast in certain situations because it minimizes data movement.
-- No shuffle. Merge partitions on the same node into one partition.
-- Coalesce changes the number of nodes by moving data from some partitions to existing partitions. This algorithm obviously **cannot increase** the number of partitions.
-  - For example, `numbersDf.rdd.partitions.size` is 4. Even if you use `numbersDf.coalesce(6)`, it is still 4 rather than 6.
-- Avoids a full data shuffle.
-
-### Repartition
-
-- Repartition can be used to either increase or decrease the number of partitions in a DataFrame.
-- Does a full data shuffle.
-- If there is only a little amount of data but the number of partitions is big, there will be many empty partitions.
-- You should only repartition when the future number of partitions is greater than the current number of partitions or when you are looking to partition by a set of columns.
-- If you are going to be filtering by a certain column ofter, it can be worth repartitioning based on that column. E.g. `df.repartition(col("<columnName>"))`, or `df.repartition(<numberOfPartitions>, col("<columnName>"))`.
-
-### Real World Example
-
-1. Suppose you have a data lake that contains 2 billion rows of data (1TB) split in 13,000 partitions.
-2. You want to create a data puddle containing 2,000 rows of data for the purpose of development by random sampling of one millionth of the data lake.
-3. Write the data puddle out to S3 for easy access.
-
-```scala
-val dataPuddle = dataLake.sample(true, 0.000001)
-dataPuddle.write.parquet("s3a://my_bucket/puddle/")
-```
-
-4. Spark does not adjust the number of partitions, so the dataPuddle will also have 13,000 partitions, which means a lot of the partitions will be empty.
-5. Not efficient to read or write thousands of empty text files to S3. Improve by repartitioning.
-
-```scala
-val dataPuddle = dataLake.sample(true, 0.000001)
-val goodPuddle = dataPuddle.repartition(4)
-goodPuddle.write.parquet("s3a://my_bucket/puddle/")
-```
-
-6. **Why choosing 4 partitions here?** 13,000 partitions / 1,000,000 = 1 partition. Then `number_of_partitions = number_of_cpus_in_cluster * 4` (2, 3 or 4).
-7. **Why using repartition instead of coalesce here?** The data puddle is small. The repartition method returns equal sized text files, which are more efficient for downstream consumers.
-
-- **When filtering large DataFrames into smaller ones, you should almost always repartition the data.**
-- **If you are reducing the number of overall partitions, first try `coalesce`.**
+When reading a CSV file as a Dataset with a case class, make sure headers of the CSV file matches fields of the case class. If they are not the same, use code to modify the header after converting the CSV file to DataFrame, e.g. removing spaces and lowering case the first character, and then convert to Dataset.   
 
 ---
 
