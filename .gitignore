@@ -1,4 +1,16 @@
+# Eclipse
+.classpath
+.project
+.settings/
 
-.cache-main
-.cache-main
-.cache-main
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Mac
+.DS_Store
+
+# Maven
+log/
+target/
